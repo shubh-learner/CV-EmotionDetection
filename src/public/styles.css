@@ -1,0 +1,185 @@
+html {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	font-family     : Comic Sans, Helvetica, sans-serif;
+	text-align      : center;
+	background-color: #e9ecef;
+	margin          : 0;
+	padding         : 0;
+	width           : 100%;
+	height          : 100%;
+	display         : flex;
+	flex-direction  : column;
+}
+
+.containerheader {
+	padding         : 10px;
+	position        : relative;
+	background-color: #ced4da;
+
+}
+
+.description  {
+	font-style: italic;
+	font-size : 14px;
+	margin    : 3px 0 0;
+}
+
+.container-heading {
+	margin    : 0;
+	text-align: center;
+}
+
+.heading_font {
+	color      : #ff6666;
+	position   : center;
+	font-family: 'Bubblegum Sans', cursive;
+	font-size  : 65px;
+	text-shadow: 4px 4px 4px #aaa;
+}
+
+#overlay {
+	position         : absolute;
+	top              : 0px;
+	left             : 0px;
+	-o-transform     : scaleX(-1);
+	-webkit-transform: scaleX(-1);
+	transform        : scaleX(-1);
+	-ms-filter       : fliph;
+	/*IE*/
+	filter           : fliph;
+	/*IE*/
+
+	width : 600px;
+	height: 430px;
+}
+
+#videoInput {
+	-o-transform     : scaleX(-1);
+	-webkit-transform: scaleX(-1);
+	transform        : scaleX(-1);
+	-ms-filter       : fliph;
+	/*IE*/
+	filter           : fliph;
+	/*IE*/
+
+	width : 600px;
+	height: 430px;
+}
+
+#container {
+	position : relative;
+	width    : 370px;
+	/*margin : 0px auto;*/
+}
+
+#content {
+	margin-top  : 10px;
+	margin-left : auto;
+	margin-right: auto;
+	max-width   : 600px;
+}
+
+#sketch,
+#filter {
+	display: none;
+}
+
+h2 {
+	font-weight: 400;
+}
+
+.btn {
+	font-family: 'Lato';
+	font-size  : 16px;
+}
+
+#controls {
+	text-align: center;
+}
+
+#emotion_container {
+	width: 600px;
+}
+
+#emotion_icons {
+	height: 50px;
+	padding-left: 0px;
+}
+
+.emotion_icon {
+	width : 40px;
+	height : 40px;
+	margin-top: 5px;
+	/*margin-left : 13px;*/
+	margin-left : 7px;
+	margin: 15px;
+	margin-right: 30px;
+}
+
+#emotion_chart,
+#emotion_icons {
+	margin: 0 auto;
+	width : 400px;
+}
+
+#icon1,
+#icon2,
+#icon3,
+#icon4,
+#icon5,
+#icon6 {
+	visibility: hidden;
+}
+
+/* d3 */
+.bar {
+	fill        : steelblue;
+	fill-opacity: .9;
+}
+
+
+/* Footer */
+.footer {
+	margin          : 0;
+	text-align      : center;
+	background-color: #ced4da;
+	font-size       : 14px;
+	padding         : 20px;
+	flex-shrink     : 0;
+	position        : relative;
+
+}
+
+.fa {
+	padding        : 13px;
+	font-size      : 15px;
+	width          : 15px;
+	text-align     : center;
+	text-decoration: none;
+	margin         : 5px 15px;
+	border-radius  : 50%;
+}
+
+.fa:hover {
+	opacity: 0.7;
+}
+
+.fa-facebook {
+	background: #3B5998;
+	color     : white;
+}
+
+.fa-github {
+	background: #6a097d;
+	color     : white;
+}
+
+
+.footer-description {
+	margin   : 0;
+	font-size: 12px;
+}

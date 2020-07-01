@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Face Detection</title>
+	<meta charset="utf-8">
+
+
+
+<body>
+	<script src="./services/utils.js"></script>
+	<script src="./services/clmtrackr.js"></script>
+	<script src="./services/model_pca_20_svm_emotionDetection.js"></script>
+	<script src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+	<script src="./services/d3.min.js"></script>
+	<script src="./services/emotion_classifier.js"></script>
+	<script src="./services/emotionmodel.js"></script>
+	<link rel="shortcut icon" href="./public/computer-vision.png">
+	<link rel="stylesheet" type="text/css" href="./public/styles.css">
+	<link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Neucha&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<!-- Website Title -->
+	<div class="containerheader">
+		<h1 class='container-heading'><span class="heading_font">Emotion Detection App</span></h1>
+		<p class='description'>A Computer Vision Web app, developed on Express Framework, deployed on Heroku.</p>
+	</div>
+
+	<div id="content">
+
+		<div id="container">
+			<video id="videoInput" width="400" height="300" preload="auto" loop>
+			</video>
+			<canvas id="overlay" width="400" height="300"></canvas>
+		</div>
+		<canvas id="sketch" width="400" height="300"></canvas>
+		<div id="emotion_container">
+			<div id="emotion_icons">
+				<img class="emotion_icon" id="icon1" src="public/angry.png">
+				<img class="emotion_icon" id="icon2" src="public/sad.png">
+				<img class="emotion_icon" id="icon3" src="public/surprised.png">
+				<img class="emotion_icon" id="icon4" src="public/happy.png">
+			</div>
+			<div id='emotion_chart'></div>
+		</div>
+		<div id="controls">
+			<input class="btn" type="button" value="wait..." disabled="disabled" onclick="startVideo()"
+				id="startbutton"></input>
+			<input class="btn" type="button" value="Pause" onclick="stopVideo()" id="startbutton"></input>
+		</div>
+
+	</div>
+	<br>
+	<!-- Footer -->
+	<div class='footer'>
+		<div class="contact">
+			<a target="_blank" href="https://facebook.com/arya.shubh" class="fa fa-facebook"></a>
+			<a target="_blank" href="https://github.com/shubh-learner/" class="fa fa-github"></a>
+		</div>
+		<p class='footer-description'>Action is the foundational key to all success. ❤️ Shubh Arya.</p>
+	</div>
+
+	<script>
+		var video = document.getElementById('videoInput');
+		var overlay = document.getElementById('overlay');
+		var overlayCC = overlay.getContext('2d');
+
+		/********** Webcam Input using WebRTC **********/
+
+		function enablestart() {
+			var startbutton = document.getElementById('startbutton');
+			startbutton.value = "Start";
+			startbutton.disabled = null;
+		}
+
+
+		navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+		window.URL = window.URL || window.webkitURL || window.msURL || window.mozURL;
+
+		// check if browser(Chrome) supports camera - webRTC
+		if (navigator.getUserMedia) {
+			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+				.then(function (s) {
+					stream = s;
+					video.srcObject = s;
+					video.play();
+				}, function () {
+
+					alert("Please change the settings to allow the browser to access the webcam. Once done refresh the page.");
+				});
+		} else {
+
+			alert("It looks like browser does not support WebRTC");
+		}
+
+		video.addEventListener('canplay', enablestart, false);
+
+		/*********** setup of emotion detection *************/
+
+		var ctrack = new clm.tracker({ useWebGL: true });
+		ctrack.init(pModel);
+
+		function startVideo() {
+			video.play();
+			ctrack.start(video);
+			drawLoop();
+		}
+
+		function stopVideo() {
+			// start video
+			video.pause();
+
+		}
+
+		function drawLoop() {
+			requestAnimFrame(drawLoop);
+			overlayCC.clearRect(0, 0, 400, 300);
+
+			if (ctrack.getCurrentPosition()) {
+				ctrack.draw(overlay);
+
+			}
+			var cp = ctrack.getCurrentParameters();
+
+			var er = ec.meanPredict(cp);
+			if (er) {
+				updateData(er);
+				for (var i = 0; i < er.length; i++) {
+					if (er[i].value > 0.4) {
+						document.getElementById('icon' + (i + 1)).style.visibility = 'visible';
+					} else {
+						document.getElementById('icon' + (i + 1)).style.visibility = 'hidden';
+					}
+				}
+			}
+		}
+
+		var ec = new emotionClassifier();
+		ec.init(emotionModel);
+		var emotionData = ec.getBlank();
+
+		/****** Chart for Emotion prediction *********/
+
+		var margin = { top: 20, right: 20, bottom: 10, left: 40 },
+			width = 400 - margin.left - margin.right,
+			height = 100 - margin.top - margin.bottom;
+
+		var barWidth = 30;
+
+		var formatPercent = d3.format(".0%");
+
+		var x = d3.scale.linear()
+			.domain([0, ec.getEmotions().length]).range([margin.left, width + margin.left]);
+
+		var y = d3.scale.linear()
+			.domain([0, 1]).range([0, height]);
+
+		var svg = d3.select("#emotion_chart").append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+
+		svg.selectAll("rect").
+			data(emotionData).
+			enter().
+			append("svg:rect").
+			attr("x", function (datum, index) { return x(index); }).
+			attr("y", function (datum) { return height - y(datum.value); }).
+			attr("height", function (datum) { return y(datum.value); }).
+			attr("width", barWidth).
+			attr("fill", "#2d578b");
+
+		svg.selectAll("text.labels").
+			data(emotionData).
+			enter().
+			append("svg:text").
+			attr("x", function (datum, index) { return x(index) + barWidth; }).
+			attr("y", function (datum) { return height - y(datum.value); }).
+			attr("dx", -barWidth / 2).
+			attr("dy", "1.2em").
+			attr("text-anchor", "middle").
+			text(function (datum) { return datum.value; }).
+			attr("fill", "white").
+			attr("class", "labels");
+
+		svg.selectAll("text.yAxis").
+			data(emotionData).
+			enter().append("svg:text").
+			attr("x", function (datum, index) { return x(index) + barWidth; }).
+			attr("y", height).
+			attr("dx", -barWidth / 2).
+			attr("text-anchor", "middle").
+			attr("style", "font-size: 12").
+			text(function (datum) { return datum.emotion; }).
+			attr("transform", "translate(0, 18)").
+			attr("class", "yAxis");
+
+		function updateData(data) {
+
+			var rects = svg.selectAll("rect")
+				.data(data)
+				.attr("y", function (datum) { return height - y(datum.value); })
+				.attr("height", function (datum) { return y(datum.value); });
+			var texts = svg.selectAll("text.labels")
+				.data(data)
+				.attr("y", function (datum) { return height - y(datum.value); })
+				.text(function (datum) { return datum.value.toFixed(1); });
+
+
+			rects.enter().append("svg:rect");
+			texts.enter().append("svg:text");
+
+
+			rects.exit().remove();
+			texts.exit().remove();
+		}
+
+		/** Stat meter on the page ** */
+
+		stats = new Stats();
+		stats.domElement.style.position = 'absolute';
+		stats.domElement.style.top = '0px';
+		document.getElementById('container').appendChild(stats.domElement);
+
+		// update stats on every iteration
+		document.addEventListener('clmtrackrIteration', function (event) {
+			stats.update();
+		}, false);
+
+	</script>
+
+</body>
+
+</html>
