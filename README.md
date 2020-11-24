@@ -1,7 +1,6 @@
-# Emotion_Detection
+# Emotion Detection Web App
+This web app is developed on the Express (Node.js) framework.
+It takes the input from the webcam/camera on the browser, implemented with the help of WebRTC.
 
-
-
-References:
-https://www.auduno.com/clmtrackr/docs/reference.html
-https://observablehq.com/@d3/bar-chart-race-explained
+# Please click on the below URL for the LIVE demo :
+https://faceframe.herokuapp.com/
